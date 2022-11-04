@@ -8,6 +8,8 @@ function Register() {
     const [passwordError, setPasswordError] = useState("");
     const [emailError, setEmailError] = useState("");
     const [phoneError, setphoneError] = useState("");
+    const [message, setMessage] = useState("");
+
 
     const handleSubmit = (event) => {
         // event.preventDefault();
@@ -28,14 +30,52 @@ function Register() {
             event.preventDefault();
         }
 
+        let formData = JSON.parse(localStorage.getItem("formData")) || [];
 
+        if (localStorage.getItem("formData") === null) {
+            formData.push({
+                email: email,
+                password: password,
+                phone: phone,
+            });
+            localStorage.setItem("formData", JSON.stringify(formData));
 
+            setMessage("Registration successful");
+        } else {
+            let found = false;
+            formData.forEach((item) => {
+                if (item.email === email) {
+                    setMessage("Email already exists");
+                    found = true;
+
+                }
+            });
+            if (!found) {
+                formData.push({
+                    email: email,
+                    password: password,
+                    phone: phone,
+                });
+                localStorage.setItem("formData", JSON.stringify(formData));
+                setMessage("Registration successful");
+
+            }
+
+        }
+
+        setEmail("");
+        setPassword("");
+        setPhone("");
+        event.preventDefault();
     }
+
+
+
     const handleEmail = (e) => {
         setEmail(e.target.value);
         if (email.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i)) {
             setEmailError("");
-        }else{
+        } else {
             setEmailError("please enter a valid email");
         }
 
@@ -51,10 +91,8 @@ function Register() {
             setphoneError("phone must be only numbers");
 
         }
-        if (phone.length < 6) {
-            setphoneError("phone must be more than 6 numbers");
-        } else if (phone.length > 18) {
-            setphoneError("phone must be less than 18 numbers");
+        if (phone.length !== 9) {
+            setphoneError("phone must equal 10 numbers");
         } else {
             setphoneError("");
         }
@@ -79,7 +117,9 @@ function Register() {
             <div className="row">
                 <div className="container w-50">
                     <h1 className="h1">Create an account</h1>
-                    <form action="" method="post" className="mt-5" id="sign-up" onSubmit={handleSubmit}>
+                    {message === "Registration successful" ? <div className="alert alert-success" role="alert">{message}</div> : null}
+                    {message === "Email already exists" ? <div className="alert alert-warning" role="alert">{message}</div> : null}
+                    <form action="" className="mt-5" id="sign-up" onSubmit={handleSubmit}>
                         <div>
                             <label htmlfor="email" className="form-label"
                             ><b>Email address</b><span className="star"> *</span></label
